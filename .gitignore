@@ -1,5 +1,7 @@
 *.py[cod]
 *.swp
-
+*.egg-info/
+build/
+dist/
 experiments
 TODO.txt

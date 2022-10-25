@@ -20,32 +20,32 @@ def generate_ecb_cpa_decrypt_attack_script(ciphertexts):
    options = dict(feathermodules.current_options)
    options = process_options(options, ciphertexts)
    if options == False:
-      print '[*] Options could not be validated, please try again.'
+      print('[*] Options could not be validated, please try again.')
       return False
    try:
-      print '[+] Attempting to write script...'
+      print('[+] Attempting to write script...')
       fh = open(options['filename'], 'w')
       fh.write(ecb_cpa_decrypt_attack_script_skeleton % (options['blocksize'], options['hollywood']))
       fh.close()
    except:
-      print '[*] Couldn\'t write to the file with the name provided. Please try again.'
+      print('[*] Couldn\'t write to the file with the name provided. Please try again.')
       return False
-   print '[+] Done! Your script is available at %s' % options['filename']
+   print('[+] Done! Your script is available at %s' % options['filename'])
    return True
 
 
 def process_options(options, ciphertexts):
    if options['blocksize'] == 'auto':
-      print '[+] Analyzing samples to discover block size...'
+      print('[+] Analyzing samples to discover block size...')
       analysis_results = ca.analyze_ciphertext(ciphertexts)
       blocksize = analysis_results['blocksize']
       if blocksize == 0:
-         print '[*] No common block size could be discovered.'
+         print('[*] No common block size could be discovered.')
       else:
          options['blocksize'] = blocksize
    else:
       try:
-         print '[+] Checking block size...'
+         print('[+] Checking block size...')
          options['blocksize'] = int(options['blocksize'])
       except:
          return False

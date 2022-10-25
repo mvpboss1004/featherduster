@@ -1,13 +1,12 @@
 import cryptanalib as ca
 import feathermodules
-from time import sleep
 from Crypto.PublicKey import RSA
 
 def rsa_wiener_attack(ciphertexts):
    options = dict(feathermodules.current_options)
    options = prepare_options(options, ciphertexts)
    if options == False:
-      print '[*] Could not process options.'
+      print('[*] Could not process options.')
       return False
    answers = []
    for ciphertext in ciphertexts:
@@ -27,7 +26,7 @@ def rsa_wiener_attack(ciphertexts):
    
    for answer in answers:
       key = RSA.construct(answer)
-      print "Found private key:\n%s" % key.exportKey()
+      print("Found private key:\n%s" % key.exportKey())
    
    if len(answers) == 0:
       return False
@@ -40,7 +39,7 @@ def prepare_options(options, ciphertexts):
    try:
       options['minutes_to_wait'] = float(options['minutes_to_wait'])
    except:
-      print '[*] Couldn\'t convert minutes provided to a number.'
+      print('[*] Couldn\'t convert minutes provided to a number.')
       return False
    return options
 

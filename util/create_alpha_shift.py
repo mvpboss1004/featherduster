@@ -9,4 +9,4 @@ def alpha_shift(plaintext, key):
          ciphertext += char
    return ciphertext
 
-print alpha_shift('This is my ciphertext. It\'s awesome and wonderful.', 6)
+print(alpha_shift('This is my ciphertext. It\'s awesome and wonderful.', 6))

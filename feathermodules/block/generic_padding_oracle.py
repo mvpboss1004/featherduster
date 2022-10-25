@@ -43,58 +43,58 @@ def generate_generic_padding_oracle_attack_script(ciphertexts):
    options = dict(feathermodules.current_options)
    options = prepare_options(options, ciphertexts)
    if options == False:
-      print '[*] Options could not be validated. Please try again.'
+      print('[*] Options could not be validated. Please try again.')
       return False
    try:
-      print '[+] Attempting to write script...'
+      print('[+] Attempting to write script...')
       fh = open(options['filename'], 'w')
       fh.write(po_attack_script_skeleton % (options['blocksize'],options['padding_type'],options['iv'],options['hollywood'],options['blocksize']))
       fh.close()
    except:
-      print '[*] Couldn\'t write to the file with the name provided. Please try again.'
+      print('[*] Couldn\'t write to the file with the name provided. Please try again.')
       return False
-   print '[+] Done! Your script is available at %s' % options['filename']
-   print '[+] The script as-is will not be functional, please edit the padding_oracle() function as described in the generated script.'
+   print('[+] Done! Your script is available at %s' % options['filename'])
+   print('[+] The script as-is will not be functional, please edit the padding_oracle() function as described in the generated script.')
    return True
 
 def prepare_options(options, ciphertexts):
    if options['blocksize'] == 'auto':
       analysis_results = ca.analyze_ciphertext(ciphertexts)
       if analysis_results['blocksize'] == 0:
-         print '[*] Couldn\'t detect a common blocksize.'
+         print('[*] Couldn\'t detect a common blocksize.')
          return False
       options['blocksize'] = analysis_results['blocksize']
    else:
       try:
          options['blocksize'] = int(options['blocksize'])
       except:
-         print '[*] Blocksize could not be interpreted as a number.'
+         print('[*] Blocksize could not be interpreted as a number.')
          return False
    
    # If we actually supported anything but pkcs7, here we would do:
-   # arguments['padding_type'] = raw_input(padding_menu)
+   # arguments['padding_type'] = input(padding_menu)
    # But we don't, so we:
    options['padding_type'] = 'pkcs7'
    
    if options['iv'] == '':
-      print '[+] No IV provided, defaulting to null block.'
+      print('[+] No IV provided, defaulting to null block.')
       options['iv'] = '00'*options['blocksize']
    else:
       try:
          options['iv'].decode('hex')
       except:
-         print '[*] IV was not in the correct format. Please provide a hex-encoded IV with length matching the blocksize.'
+         print('[*] IV was not in the correct format. Please provide a hex-encoded IV with length matching the blocksize.')
          return False
       if (len(options['iv'])/2) != options['blocksize']:
-         print '[*] IV was not the correct length. Please provide a hex-encoded IV with length matching the blocksize.'
+         print('[*] IV was not the correct length. Please provide a hex-encoded IV with length matching the blocksize.')
          return False
    
    # We don't use this yet, commented out for now.
    '''
    while True:
-      prefix_answer = raw_input('Do you need to use a prefix (no)? ')
+      prefix_answer = input('Do you need to use a prefix (no)? ')
       if prefix_answer.lower() not in ['','n','no']:
-         prefix = raw_input('Please enter the prefix you want to use, hex encoded: ')
+         prefix = input('Please enter the prefix you want to use, hex encoded: ')
          try:
             arguments['prefix'] = prefix.decode('hex')
             break

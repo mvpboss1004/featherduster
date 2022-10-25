@@ -1,5 +1,5 @@
 echo 'Testing set command...'
-python ./featherduster/featherduster.py --debug <<EOF
+python3 featherduster/featherduster.py --debug <<EOF
 set foo=bar
 use alpha_shift
 set foo=bar

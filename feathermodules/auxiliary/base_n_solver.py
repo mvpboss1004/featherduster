@@ -11,13 +11,13 @@ def base_n_solve(samples):
       candidate_list = []
       for base in range(2,36+1): # numbers 2-36
          try:
-            candidate_list.append(ca.long_to_string(long(sample,base)))
+            candidate_list.append(ca.long_to_string(int(sample,base)))
          except:
             continue
-      print 'Best answers for sample: {0}\n'.format(sample[:36])
-      print '-'*80
+      print('Best answers for sample: {0}\n'.format(sample[:36]))
+      print('-'*80)
       results = sorted(candidate_list[:arguments['num_answers']],key=ca.detect_plaintext)
-      print '\n'.join([repr(x) for x in results])
+      print('\n'.join([repr(x) for x in results]))
    
    return results
 

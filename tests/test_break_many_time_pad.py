@@ -47,7 +47,7 @@ ciphertexts = []
 for plaintext in plaintexts:
    ciphertexts.append(ca.sxor(key, plaintext))
 
-print 'Testing many-time pad solver...'
+print('Testing many-time pad solver...')
 answers = ca.break_many_time_pad(ciphertexts, verbose=True)
 
 total_bit_length = 0

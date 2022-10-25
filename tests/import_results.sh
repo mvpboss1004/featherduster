@@ -1,5 +1,5 @@
 echo 'Testing result import command...'
-python ./featherduster/featherduster.py --debug <<EOF | egrep "^'hello'$"
+python3 featherduster/featherduster.py --debug <<EOF | egrep "^'hello'$"
 import manualentry
 Z2Rra24=
 analyze

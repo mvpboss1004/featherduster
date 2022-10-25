@@ -18,20 +18,20 @@ for i in range(10):
 
 correct_next_state = lcg(current_state)
 
-print correct_prev_state
-print states
-print correct_next_state
+print(correct_prev_state)
+print(states)
+print(correct_next_state)
 
-print 'Testing LCG cracker...'
+print('Testing LCG cracker...')
 
-print '...with known a,c,m...'
+print('...with known a,c,m...')
 assert ca.lcg_next_states(states, 1, a=31337, c=1337, m=101020101)[0] == correct_next_state
-print '...with known a,m...'
+print('...with known a,m...')
 assert ca.lcg_next_states(states, 1, a=31337, m=101020101)[0] == correct_next_state
 
-print 'Testing previous state recovery...'
+print('Testing previous state recovery...')
 
-print '...with known a,c,m...'
+print('...with known a,c,m...')
 assert ca.lcg_prev_states(states, 1, a=31337, c=1337, m=101020101)[0] == correct_prev_state
-print '...with known a,m...'
+print('...with known a,m...')
 assert ca.lcg_prev_states(states, 1, a=31337, m=101020101)[0] == correct_prev_state

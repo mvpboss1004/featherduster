@@ -1,10 +1,9 @@
 import sys
-import string
 import cryptanalib as ca
 
 source = sys.argv[1]
 #charset = list(sys.argv[2])
-charset = [chr(x) for x in xrange(256)]
+charset = [chr(x) for x in range(256)]
 
 source_file = open(source,'r')
 source_text = source_file.read()
@@ -23,4 +22,4 @@ charset.extend(digraphs)
 
 char_freq = ca.generate_frequency_table(source_text, charset)
 
-print "frequency_tables['"+sys.argv[3]+"']="+str(char_freq)
+print("frequency_tables['"+sys.argv[3]+"']="+str(char_freq))

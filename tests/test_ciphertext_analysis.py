@@ -2,9 +2,9 @@ from Crypto import Random
 from Crypto.Cipher import AES
 import cryptanalib as ca
 from zlib import compress, decompress
-from urllib import quote
+from urllib.parse import quote
 
-print 'Testing ciphertext analysis engine...'
+print('Testing ciphertext analysis engine...')
 
 plaintext = 'I am the very model of a modern major-general, I\'ve information vegetable, animal and mineral, I know the kings of England and I quote the fights historical, from Marathon to Waterloo in order categoricalAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 
@@ -56,57 +56,57 @@ two_time_pad_ciphertexts.append(ca.sxor(plaintext2,two_time_pad_key))
 
 compressed_messages = [compress(plaintext), compress(plaintext2)]
 
-print 'Analyzing ECB ciphertexts...'
+print('Analyzing ECB ciphertexts...')
 ecb_results = ca.analyze_ciphertext(ecb_ciphertexts)
 if 'ecb' not in ecb_results['keywords']:
    exit('ECB detection is broken.')
 
-print 'Analyzing CBC fixed-IV ciphertexts...'
+print('Analyzing CBC fixed-IV ciphertexts...')
 cbc_results = ca.analyze_ciphertext(cbc_ciphertexts)
 if 'cbc_fixed_iv' not in cbc_results['keywords']:
    exit('CBC fixed IV detection is broken.')
 
-print 'Analyzing multi-byte XOR ciphertexts...'
+print('Analyzing multi-byte XOR ciphertexts...')
 multi_byte_xor_results = ca.analyze_ciphertext(mb_xor_ciphertexts)
 if 'individually_low_entropy' not in multi_byte_xor_results['keywords']:
    exit('Multi-byte XOR not flagged as weak crypto.')
 
-print 'Analyzing two-time pad ciphertexts...'
+print('Analyzing two-time pad ciphertexts...')
 two_time_pad_results = ca.analyze_ciphertext(two_time_pad_ciphertexts)
 if 'key_reuse' not in two_time_pad_results['keywords']:
    exit('Key reuse detection is broken.')
 
-print 'Analyzing hex-encoded ciphertext...'
+print('Analyzing hex-encoded ciphertext...')
 hex_results = ca.analyze_ciphertext([ct.encode('hex') for ct in ecb_ciphertexts])
 if hex_results['decoded_ciphertexts'][0] != ecb_ciphertexts[0]:
    exit('Hex encoding detection is broken.')
 
-print 'Analyzing base64-encoded ciphertext...'
+print('Analyzing base64-encoded ciphertext...')
 base64_results = ca.analyze_ciphertext([ct.encode('base64') for ct in ecb_ciphertexts])
 if base64_results['decoded_ciphertexts'][0] != ecb_ciphertexts[0]:
    exit('Base64 encoding detection is broken.')
 
-print 'Analyzing url-encoded ciphertext...'
+print('Analyzing url-encoded ciphertext...')
 url_results = ca.analyze_ciphertext([quote(ct) for ct in ecb_ciphertexts])
 if url_results['decoded_ciphertexts'][0] != ecb_ciphertexts[0]:
    exit('URL encoding detection is broken.')
 
-print 'Analyzing compressed plaintexts...'
+print('Analyzing compressed plaintexts...')
 compressed_results = ca.analyze_ciphertext(compressed_messages)
 if compressed_results['decoded_ciphertexts'][0] != decompress(compressed_messages[0]):
    exit('Zlib compression detection is broken.')
 
-print 'Analyzing critically small RSA key...'
+print('Analyzing critically small RSA key...')
 crit_rsa_length_results = ca.analyze_ciphertext([RSA_pubkey_critically_small_n])
 if 'rsa_small_n' not in crit_rsa_length_results['keywords']:
    exit('Small RSA modulus detection is broken.')
 
-print 'Analyzing very small RSA key...'
+print('Analyzing very small RSA key...')
 very_small_rsa_length_results = ca.analyze_ciphertext([RSA_pubkey_very_small_n])
 if 'rsa_small_n' not in very_small_rsa_length_results['keywords']:
    exit('Small RSA modulus detection is broken.')
 
-print 'Analyzing small RSA key...'
+print('Analyzing small RSA key...')
 small_rsa_length_results = ca.analyze_ciphertext([RSA_pubkey_small_n])
 if 'rsa_small_n' not in small_rsa_length_results['keywords']:
    exit('Small RSA modulus detection is broken.')

@@ -7,10 +7,9 @@ setup(name='featherduster',
       author='Daniel "unicornfurnace" Crowley',
       author_email='daniel.crowley@nccgroup.trust',
       license='BSD',
-      #packages=['cryptanalib','feathermodules','featherduster'],
       packages=find_packages(exclude=['examples','tests']),
       install_requires=[
-          'pycrypto',
+          'pycryptodome',
           'ishell'
       ],
       entry_points = {

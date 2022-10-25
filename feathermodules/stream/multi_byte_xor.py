@@ -4,11 +4,11 @@ import feathermodules
 def multi_byte_xor_attack(ciphertexts):
    options = prepare_options(dict(feathermodules.current_options))
    results = []
-   print '[+] Running multi-byte XOR brute force attack...'
+   print('[+] Running multi-byte XOR brute force attack...')
    for ciphertext in ciphertexts:
-      print '\nBest candidate decryptions for ' + ciphertext[:20] + '...:\n' + '-'*40 + '\n'
+      print('\nBest candidate decryptions for ' + ciphertext[:20] + '...:\n' + '-'*40 + '\n')
       result_list = ca.break_multi_byte_xor(ciphertext, verbose=True, num_answers=options['number_of_answers'])
-      print '\n'.join(result_list)
+      print('\n'.join(result_list))
       results.append(result_list)
       
    return results
@@ -17,7 +17,7 @@ def prepare_options(options):
    try:
       options['number_of_answers'] = int(options['number_of_answers'])
    except:
-      print '[*] Could not interpret number of answers option as a number.'
+      print('[*] Could not interpret number of answers option as a number.')
       return False
    return options
 

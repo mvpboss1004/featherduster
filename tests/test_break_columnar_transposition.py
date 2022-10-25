@@ -4,9 +4,9 @@ plaintext = 'I am the very model of a modern major-general, I\'ve information ve
 
 num_rows = 6
 
-ciphertext = ''.join([plaintext[num::num_rows] for num in xrange(num_rows)])
+ciphertext = ''.join([plaintext[num::num_rows] for num in range(num_rows)])
 
-print 'Testing columnar transposition solver...'
+print('Testing columnar transposition solver...')
 
 myplaintext = ca.break_columnar_transposition(ciphertext)
 if myplaintext[0][0] != plaintext:

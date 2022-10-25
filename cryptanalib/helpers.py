@@ -11,9 +11,9 @@ from Crypto.PublicKey import RSA
 
 from decimal import *
 import string
-import frequency
+from . import frequency
 import zlib
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 #------------------------------------
 # Helper functions
@@ -114,17 +114,17 @@ def show_histogram(frequency_table, width=80, sort=True):
    normalizing_multiplier = width / max_value
 
    if sort:
-      frequency_table = sorted(frequency_table.items(),key=lambda (k,v): (v,k), reverse=True)
+      frequency_table = sorted(list(frequency_table.items()),key=lambda k_v: (k_v[1],k_v[0]), reverse=True)
    else:
-      frequency_table = frequency_table.items()
+      frequency_table = list(frequency_table.items())
 
-   print '0%' + ' ' * (width-6) + str(max_value*100)+'%'
-   print '-' * width
+   print('0%' + ' ' * (width-6) + str(max_value*100)+'%')
+   print('-' * width)
    
    for key, value in frequency_table:
       freq_bars = int(value * normalizing_multiplier)
       if freq_bars != 0:
-         print key + '|' + '=' * freq_bars
+         print(key + '|' + '=' * freq_bars)
 
 def is_base64_encoded(sample):
    '''
@@ -165,7 +165,7 @@ def is_url_encoded(sample):
    EX: Returns True for "abc%20def"
    EX: Returns False for "foobar"
    """
-   return sample != urllib.unquote(sample)
+   return sample != urllib.parse.unquote(sample)
 
 
 def is_zlib_compressed(sample):
@@ -188,7 +188,7 @@ def detect_polybius(sample):
    sample - (string) The sample to evaluate
    '''
    correct_charset = all([char in ' 01234567' for char in sample])
-   correct_length = len(filter(lambda x: x in '01234567',sample)) % 2 == 0
+   correct_length = len([x for x in sample if x in '01234567']) % 2 == 0
    return correct_charset and correct_length
 
 
@@ -240,9 +240,9 @@ def check_key_reuse(samples):
    
    samples - (list) Two or more samples for evaluation
    '''
-   samples = filter(lambda x: len(x) is not 0, samples)
+   samples = [x for x in samples if len(x) is not 0]
    if len(samples) == 1:
-      print 'Need more than one non-null sample'
+      print('Need more than one non-null sample')
       return None
    total_length = total_hamming_distance = 0
    for sample in samples[1:]:
@@ -296,27 +296,27 @@ def is_random(sample, verbose=False, boolean_results=True):
       return False
    if sample_length < 100:
       if verbose:
-         print '[*] Warning! Small sample size, results may be unreliable.'
+         print('[*] Warning! Small sample size, results may be unreliable.')
    # Arithmetic mean test
    mean = sum([ord(char) for char in sample])/float(sample_length)
    if verbose:
-      print '[+] Arithmetic mean of sample is '+str(mean)+'. (127.5 = random)'
+      print('[+] Arithmetic mean of sample is '+str(mean)+'. (127.5 = random)')
    if ((mean <= 110) or (mean >= 145)):
       results['mean_failed'] = True
       if verbose:
-         print '[!] Arithmetic mean of sample suggests non-random data.'
+         print('[!] Arithmetic mean of sample suggests non-random data.')
    else:
       results['mean_failed'] = False
    # Byte and digraph count test
-   byte_count = generate_frequency_table(sample, map(chr,range(256)))
+   byte_count = generate_frequency_table(sample, list(map(chr,list(range(256)))))
    min_to_max = max(byte_count.values())-min(byte_count.values())
    if verbose:
-      print '[+] Distance between lowest and highest byte frequencies is '+str(min_to_max)+'.'
-      print '[+] Distance for 100+ random bytes of data generally does not exceed 0.4'
+      print('[+] Distance between lowest and highest byte frequencies is '+str(min_to_max)+'.')
+      print('[+] Distance for 100+ random bytes of data generally does not exceed 0.4')
    if min_to_max > 0.4:
       results['byte_count_failed'] = True
       if verbose:
-         print '[!] Distance between byte frequencies suggests non-random data.'
+         print('[!] Distance between byte frequencies suggests non-random data.')
    else:
       results['byte_count_failed'] = False
    # Longest bit run test
@@ -334,46 +334,46 @@ def is_random(sample, verbose=False, boolean_results=True):
          longest_run = current_run
       prev_bit = bit
    if verbose:
-      print '[+] Longest same-bit run in the provided sample is %s' % str(longest_run)
-      print '[+] This value generally doesn\'t exceed 20 in random data.'
+      print('[+] Longest same-bit run in the provided sample is %s' % str(longest_run))
+      print('[+] This value generally doesn\'t exceed 20 in random data.')
    results['bit_run_failed'] = (longest_run >= longest_bit_run_threshold)
    if results['bit_run_failed'] and verbose:
-      print '[!] Long same-bit run suggests non-random data.'
+      print('[!] Long same-bit run suggests non-random data.')
    # Monte Carlo estimation of Pi test
    approximate_pi = 3.141592654
    monte_carlo_pi_value_deviation = abs(approximate_pi - monte_carlo_pi(sample)) 
    results['monte_carlo_failed'] = (monte_carlo_pi_value_deviation > 0.4)
    if verbose:
-      print '[+] Deviation between the approx. value of pi and the one generated by this sample using Monte Carlo estimation is %s' % str(monte_carlo_pi_value_deviation)
-      print '[+] Deviation for 100+ random bytes of data generally does not exceed 0.4.'
+      print('[+] Deviation between the approx. value of pi and the one generated by this sample using Monte Carlo estimation is %s' % str(monte_carlo_pi_value_deviation))
+      print('[+] Deviation for 100+ random bytes of data generally does not exceed 0.4.')
    if results['monte_carlo_failed'] and verbose:
-      print '[!] Deviation exceeds 0.4. If no other randomness tests failed, this data may be compressed, not encrypted or random.'
+      print('[!] Deviation exceeds 0.4. If no other randomness tests failed, this data may be compressed, not encrypted or random.')
    # Compression ratio test
    compression_ratio = len(zlib.compress(sample,9)) / float(len(sample))
    if verbose:
-      print '[+] Zlib best compression ratio is {0:.0f}%'.format(compression_ratio * 100)
-      print '[+] Compression ratio for random data is unlikely to be lower than 95%.'
+      print('[+] Zlib best compression ratio is {0:.0f}%'.format(compression_ratio * 100))
+      print('[+] Compression ratio for random data is unlikely to be lower than 95%.')
    results['compression_ratio_failed'] = (compression_ratio <= .95)
    if boolean_results:
       if any(results.values()):
          if verbose:
-            print '[!] One or more tests for randomness suggests non-random data.'
-            print '[!] This data may be the result of weak encryption like XOR.'
-            print '[!] This may also suggest a fixed IV or ECB mode.'
-            print '[!] This data may also be simply compressed or in a proprietary format.'
+            print('[!] One or more tests for randomness suggests non-random data.')
+            print('[!] This data may be the result of weak encryption like XOR.')
+            print('[!] This may also suggest a fixed IV or ECB mode.')
+            print('[!] This data may also be simply compressed or in a proprietary format.')
          return False
       else:
          if verbose:
-            print '[+] This data has passed all randomness tests performed.'
-            print '[+] This suggests data generated by a RNG, CSPRNG, or strong encryption.'
+            print('[+] This data has passed all randomness tests performed.')
+            print('[+] This suggests data generated by a RNG, CSPRNG, or strong encryption.')
          return True
    else:
       if verbose:
          if sum(results.values()) == 1:
             if results['monte_carlo_failed']:
-               print '[+] Only the Monte Carlo Pi generation test has failed. This may indicate that the data is not encrypted, but simply compressed.'
+               print('[+] Only the Monte Carlo Pi generation test has failed. This may indicate that the data is not encrypted, but simply compressed.')
             elif results['bit_run_failed']:
-               print '[+] Only the longest-bit-run test has failed. This suggests that certain portions of the data are not encrypted.'
+               print('[+] Only the longest-bit-run test has failed. This suggests that certain portions of the data are not encrypted.')
       return results
 
 def gcd(a,b):
@@ -467,7 +467,7 @@ def detect_plaintext(candidate_text, pt_freq_table=frequency.frequency_tables['e
    '''
 
    # generate score as deviation from expected character frequency
-   pt_freq_table_keys = pt_freq_table.keys()
+   pt_freq_table_keys = list(pt_freq_table.keys())
    candidate_dict = generate_frequency_table(candidate_text, pt_freq_table_keys)
    char_deviation_score = 0
    for char in pt_freq_table_keys:
@@ -495,12 +495,12 @@ def generate_optimized_charset_from_frequency(freq_table, include_zero_freq=Fals
    return a string with only single characters sorted by frequency of occurrence descending
    '''
    # Filter out frequency items to only single characters
-   single_char_freq_table = dict(filter(lambda x: len(x[0])==1, freq_table.items()))
+   single_char_freq_table = dict([x for x in list(freq_table.items()) if len(x[0])==1])
    # Filter out items which never occur
    if not include_zero_freq:
-      single_char_freq_table = dict(filter(lambda x: x[1] != 0, single_char_freq_table.items()))
+      single_char_freq_table = dict([x for x in list(single_char_freq_table.items()) if x[1] != 0])
    # Sort items by frequency, concatenate characters and return as a single string
-   return ''.join([x[0] for x in sorted(single_char_freq_table.items(), key=lambda x: x[1], reverse=True)])
+   return ''.join([x[0] for x in sorted(list(single_char_freq_table.items()), key=lambda x: x[1], reverse=True)])
    
    
 
@@ -523,10 +523,10 @@ def generate_frequency_table(text,charset):
       if char in charset:
          freq_table[char] += 1
          text_len += 1
-   for multigraph in filter(lambda x: len(x)>1,charset):
+   for multigraph in [x for x in charset if len(x)>1]:
       freq_table[multigraph] = string.count(text, multigraph)
    # Normalize frequencies with length of text
-   for key in freq_table.keys():
+   for key in list(freq_table.keys()):
       if text_len != 0:
          freq_table[key] /= float(text_len)
       else:
@@ -545,7 +545,7 @@ def generate_optimized_charset(text, include_zero_freq=False):
       frequency data.
    '''
 
-   all_chars = map(chr, range(256))
+   all_chars = list(map(chr, list(range(256))))
    freq_table = generate_frequency_table(text, charset=all_chars)
    return generate_optimized_charset_from_frequency(freq_table, include_zero_freq=include_zero_freq)
    
@@ -572,7 +572,7 @@ def output_mask(text, charset):
    (string) text - output to mask
    (string) charset - string containing acceptable characters
    '''
-   all_chars = output_chars = map(chr,range(256))
+   all_chars = output_chars = list(map(chr,list(range(256))))
    charset = set(charset)
    for charnum in range(256):
       if all_chars[charnum] not in charset:
@@ -585,7 +585,7 @@ def string_to_long(instring):
    
    instring - String to convert
    '''
-   return long(instring.encode("hex"),16)
+   return int(instring.encode("hex"),16)
 
 def long_to_string(inlong):
    '''
@@ -608,7 +608,7 @@ def split_into_blocks(ciphertext,blocksize):
    blocksize - The size in bytes of blocks to output
    '''
    ciphertext_len = len(ciphertext)
-   return [ciphertext[offset:offset+blocksize] for offset in xrange(0,ciphertext_len,blocksize)]
+   return [ciphertext[offset:offset+blocksize] for offset in range(0,ciphertext_len,blocksize)]
 
 
 def sxor(string1, string2):
@@ -671,7 +671,7 @@ def make_polybius_square(password,extended=False):
    ps = []
    alphabet_len = len(alphabet)
    grid_size = 5 + int(extended) # Not necessary, but looks cleaner
-   for index in xrange(0,alphabet_len,grid_size):
+   for index in range(0,alphabet_len,grid_size):
       ps.append(alphabet[index:index+grid_size])
    return ps
 
@@ -688,7 +688,7 @@ def polybius_decrypt(ps, ciphertext):
       return False
    digraphs = []
    plaintext = ''
-   for index in xrange(0,ct_len,2):
+   for index in range(0,ct_len,2):
       digraphs.append(ciphertext[index:index+2])
    for digraph in digraphs:
       x = int(digraph[0]) - 1
@@ -750,5 +750,5 @@ def derive_d_from_pqe(p,q,e):
    q - The second of the two factors of the modulus
    e - The public exponent
    '''
-   return long(number.inverse(e,(p-1)*(q-1)))
+   return int(number.inverse(e,(p-1)*(q-1)))
 

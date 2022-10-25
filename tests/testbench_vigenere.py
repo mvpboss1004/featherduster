@@ -1,7 +1,6 @@
 import cryptanalib as ca
-from random import seed, randint
+from random import randint
 from datetime import datetime
-import cProfile
 import time
 import sys
 
@@ -19,7 +18,7 @@ num_key_lengths = 3
 num_key_guesses = 100
 
 textfile = open('english_text.txt', 'r')
-english_text = filter(lambda x: x.isalpha(), textfile.read()).upper()
+english_text = [x for x in textfile.read() if x.isalpha()].upper()
 textfile.close()
 
 def update_progress(progress, status = "", done = ""):
@@ -47,7 +46,7 @@ def test_run(plaintext_len, key_len, key = ""):
                 
     # generate key
     if key == "":
-        key = "".join(ca.to_char(randint(0,25)) for i in xrange(key_len))
+        key = "".join(ca.to_char(randint(0,25)) for i in range(key_len))
     #print 'Random key:', key
     # apply encryption and decryption
     #print "plaintext length:", plaintext_len, ", key length:", key_len
@@ -87,8 +86,8 @@ def test_run(plaintext_len, key_len, key = ""):
     return score
 
 def testbench():
-    plaintext_iter = xrange(plaintext_len_min, plaintext_len_max+plaintext_len_step, plaintext_len_step)
-    key_len_iter = xrange(key_len_min, key_len_max+key_len_step, key_len_step)
+    plaintext_iter = range(plaintext_len_min, plaintext_len_max+plaintext_len_step, plaintext_len_step)
+    key_len_iter = range(key_len_min, key_len_max+key_len_step, key_len_step)
     result = [[]]
     total_progress = len(plaintext_iter)*len(key_len_iter)*iterations
     progress = 0
@@ -96,7 +95,7 @@ def testbench():
 
     time_file = open('testbench_times.txt', 'w')
 
-    print "Running Testbench"
+    print("Running Testbench")
     start_time = datetime.now()
 
     result.append([0] + list(key_len_iter))
@@ -105,7 +104,7 @@ def testbench():
         same_plaintext_len_results = [plaintext_len]
         for key_len in key_len_iter:
             single_result = 0
-            for iteration in xrange(iterations):
+            for iteration in range(iterations):
                 start_run_time = time.time()
                 score = test_run(plaintext_len, key_len)
                 single_result += score
@@ -121,20 +120,20 @@ def testbench():
 
     end_time = datetime.now()
     update_progress(1, done='Completed in %s hours             ' % str(end_time-start_time).rsplit('.')[0])
-    print 'average time per break run: %.1f' % (average_time/total_progress)
+    print('average time per break run: %.1f' % (average_time/total_progress))
     time_file.close()    
     with open('testbench.txt', 'w') as file:
         file.writelines('\t'.join(str(j) for j in i) + '\n' for i in result)
         file.close()
 
 def testbench_key_length():
-    plaintext_iter = xrange(plaintext_len_min, plaintext_len_max+plaintext_len_step, plaintext_len_step)
-    key_len_iter = xrange(key_len_min, key_len_max+key_len_step, key_len_step)
+    plaintext_iter = range(plaintext_len_min, plaintext_len_max+plaintext_len_step, plaintext_len_step)
+    key_len_iter = range(key_len_min, key_len_max+key_len_step, key_len_step)
     result = [[]]
     total_progress = len(plaintext_iter)*len(key_len_iter)*iterations
     progress = 0
 
-    print "Running Testbench with key length only"
+    print("Running Testbench with key length only")
     start_time = datetime.now()
 
     result.append([0] + list(key_len_iter))
@@ -144,17 +143,17 @@ def testbench_key_length():
         for key_len in key_len_iter:
             single_result = 0
             key_length_room = []
-            for iteration in xrange(iterations):
+            for iteration in range(iterations):
                 # generate plaintext
                 random_start = randint(0, len(english_text)-plaintext_len-1)
                 plaintext = english_text[random_start:random_start+plaintext_len]
                             
                 # generate key
-                key = "".join(ca.to_char(randint(0,25)) for i in xrange(key_len))
+                key = "".join(ca.to_char(randint(0,25)) for i in range(key_len))
                 # apply encryption and decryption
                 #print "plaintext length:", plaintext_len, "key length:", key_len
                 ciphertext = ca.translate_vigenere(plaintext, key, 0)
-                key_length_guesses = evaluate_vigenere_key_length(ciphertext, key_len_max_try)
+                key_length_guesses = ca.evaluate_vigenere_key_length(ciphertext, key_len_max_try)
                 key_length_guess = key_length_guesses[0]
 
                 score = 0.0
@@ -185,24 +184,7 @@ def testbench_key_length():
     with open('testbench.txt', 'w') as file:
         file.writelines('\t'.join(str(j) for j in i) + '\n' for i in result)
         file.close()
-    raw_input("Press Enter to continue...")
+    input("Press Enter to continue...")
 
-################
-#  PROFILING
-################
-#cProfile.run('test_run(100,5)')
-
-#def loop():
-#    for i in xrange(1000):
-#        ca.translate_vigenere(ciphertext, "KRYPT", decrypt=True)
-#cProfile.run('loop()')#, 'vigenere_stats.prof')
-
-
-##################
-#  TEST BENCHES
-##################
-#print test_run(100,5)
 testbench()
-#testbench_key_length()
-
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")

@@ -1,5 +1,5 @@
 echo 'Testing samples command...'
-python ./featherduster/featherduster.py --debug <<EOF
+python3 featherduster/featherduster.py --debug <<EOF
 samples
 import manualentry
 gdkkn

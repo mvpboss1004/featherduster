@@ -6,10 +6,10 @@ dependencies - PyCrypto
 '''
 
 # Get helper functions
-from helpers import *
+from .helpers import *
 
 import string
-import frequency
+from . import frequency
 import operator
 from math import sqrt
 
@@ -70,11 +70,11 @@ def morse_decode(text, dot='.', dash='-', space=' '):
    dash - (char) An alternate dash char
    space - (char) A char to split the text on
    '''
-   inverse_morse_table = map(lambda (x,y): (y,x), morse_table.items())
+   inverse_morse_table = list(map(lambda x,y: (y,x), list(morse_table.items())))
    dot_dash_trans = string.maketrans('.-', dot+dash)
    inverse_morse_table = [(string.translate(x,dot_dash_trans), y) for (x,y) in inverse_morse_table]
    inverse_morse_table = dict(inverse_morse_table)
-   return ''.join([inverse_morse_table[char] for char in text.split(space) if char in inverse_morse_table.keys()])
+   return ''.join([inverse_morse_table[char] for char in text.split(space) if char in list(inverse_morse_table.keys())])
 
 
 def morse_encode(text, dot='.', dash='-', space=' '):
@@ -82,7 +82,7 @@ def morse_encode(text, dot='.', dash='-', space=' '):
    Encodes text into Morse code.
    '''
    dot_dash_trans = string.maketrans('.-', dot+dash)
-   translated_morse_table = map(lambda (x,y): (x, string.translate(y, dot_dash_trans)), morse_table.items())
+   translated_morse_table = list(map(lambda x,y: (x, string.translate(y, dot_dash_trans)), list(morse_table.items())))
    translated_morse_table = dict(translated_morse_table)
    output = []
    for char in text.lower():
@@ -99,7 +99,7 @@ digraphs doesn't work as originally written
 '''
 def break_simple_substitution(ciphertext, freq_table=frequency.frequency_tables['english'], num_answers=5):
    '''Currently broken. Please do not use.'''
-   ciphertext_freq = generate_frequency_table(ciphertext, freq_table.keys())
+   ciphertext_freq = generate_frequency_table(ciphertext, list(freq_table.keys()))
    ''' Experiments in frequency matching...
    closest_match = ('', 1)
    plaintext_charset = []
@@ -114,12 +114,12 @@ def break_simple_substitution(ciphertext, freq_table=frequency.frequency_tables[
       closest_match = ('', 1)
    '''
    #old method - sort tables by frequency and map characters directly
-   plaintext_charset = [x[0] for x in sorted(freq_table.items(), key=operator.itemgetter(1), reverse=True)]
-   ciphertext_charset = [x[0] for x in sorted(ciphertext_freq.items(), key=operator.itemgetter(1), reverse=True)]
+   plaintext_charset = [x[0] for x in sorted(list(freq_table.items()), key=operator.itemgetter(1), reverse=True)]
+   ciphertext_charset = [x[0] for x in sorted(list(ciphertext_freq.items()), key=operator.itemgetter(1), reverse=True)]
    # 
    answers = []
    candidate_charset = plaintext_charset
-   for offset in xrange(len(plaintext_charset)-1):
+   for offset in range(len(plaintext_charset)-1):
       candidate_charset[offset],candidate_charset[offset+1] = candidate_charset[offset+1],candidate_charset[offset]
       answers.append(do_simple_substitution(ciphertext, candidate_charset, ciphertext_charset))
       candidate_charset[offset],candidate_charset[offset+1] = candidate_charset[offset+1],candidate_charset[offset]
@@ -131,7 +131,7 @@ def break_generic_shift(ciphertext, charset, num_answers=1):
    '''Generic shift cipher brute forcer'''
    answers = []
    charset_len = len(charset)
-   for offset in xrange(charset_len):
+   for offset in range(charset_len):
       plaintext = ''
       for char in ciphertext:
          if char in charset:
@@ -147,20 +147,20 @@ def break_alpha_shift(ciphertext, num_answers=1):
 
 def break_ascii_shift(ciphertext):
    '''Call generic shift cipher breaker with full ASCII range'''
-   return break_generic_shift(ciphertext, map(chr,range(256)))
+   return break_generic_shift(ciphertext, list(map(chr,list(range(256)))))
 
 
 def break_rail_fence(ciphertext):
-   print 'todo'
+   print('todo')
 
 def break_columnar_transposition(ciphertext, pt_freq_table=frequency.frequency_tables['single_english'], num_answers=1):
    '''Uses brute force and plaintext detection to break columnar transposition'''
    results = {}
    ciphertext_len = len(ciphertext)
    for num_cols in range(2,ciphertext_len/2):
-      result = ''.join([ciphertext[num::num_cols] for num in xrange(num_cols)])
+      result = ''.join([ciphertext[num::num_cols] for num in range(num_cols)])
       results[result] = detect_plaintext(result, pt_freq_table=pt_freq_table, detect_words=True)
-   return sorted(results.items(),key=operator.itemgetter(1))[:num_answers]
+   return sorted(list(results.items()),key=operator.itemgetter(1))[:num_answers]
 
 
 
@@ -176,15 +176,15 @@ def ind_of_coinc(text, distance):
    cutting = length % distance
    text = text[:length-cutting]
    # Initialize frequency list
-   freq = [[0 for i in xrange(26)] for i in xrange(distance)]
+   freq = [[0 for i in range(26)] for i in range(distance)]
    times = len(text)/distance
    if times == 1:
       # So called one time pad -> no chance!
       return 0
    ioc = [0]*distance
-   for offset in xrange(distance):
+   for offset in range(distance):
       # Build a frequency table for each offset
-      for i in xrange(times):
+      for i in range(times):
          freq[offset][to_number(text[i*distance+offset])] += 1
       # Calculate index of coincidence for each offset
       for f in freq[offset]:
@@ -222,7 +222,7 @@ def translate_vigenere(text, key, decrypt):
 def evaluate_vigenere_key_length(ciphertext, max_length):
    # Calculate the index of coincidence for every key length assumption
    ioc_list = []
-   for length in xrange(1, min(max_length+1, len(ciphertext))):
+   for length in range(1, min(max_length+1, len(ciphertext))):
       ioc_list.append(ind_of_coinc(ciphertext, length))
 
    # Check if we possibly caught a multiple of the actual key length:
@@ -233,15 +233,15 @@ def evaluate_vigenere_key_length(ciphertext, max_length):
 
    # Look at the peaks
    ioc_sorted = sorted(list(enumerate(ioc_contrast, start=1)), key=lambda tup: tup[1], reverse=True)
-   ioc_best_guesses = filter(lambda tup: tup[1] > 0.15*max(ioc_contrast), ioc_sorted)
-   key_length_best_guesses = map(list, zip(*ioc_best_guesses))[0]
+   ioc_best_guesses = [tup for tup in ioc_sorted if tup[1] > 0.15*max(ioc_contrast)]
+   key_length_best_guesses = list(map(list, list(zip(*ioc_best_guesses))))[0]
    key_length = key_length_best_guesses[0]
 
    # If a divisor of the guessed key length is also possible -> pick that one!
    repeat = True
    while repeat:
       repeat = False
-      for divisor in xrange(2, int(sqrt(max_length))):
+      for divisor in range(2, int(sqrt(max_length))):
          if key_length % divisor == 0 and key_length / divisor in key_length_best_guesses:
             # Found a reasonable divisor -> key length can be reduced
             key_length /= divisor
@@ -269,16 +269,16 @@ def break_shift(ciphertext, ref_letter_freq, correlation = False):
    # Perform frequency analysis
    if correlation:
       # Break shift cipher by cross correlation with reference frequency
-      cross_correlation = [sum([ref_letter_freq[i]*freq[(i+shift) % 26] for i in xrange(26)]) for shift in xrange(26)]
+      cross_correlation = [sum([ref_letter_freq[i]*freq[(i+shift) % 26] for i in range(26)]) for shift in range(26)]
       # Sort the shift guesses by descending correlation value
       shifts = sorted(list(enumerate(chi_square_shifts)), key=lambda tup: tup[1], reverse=True)
    else:
       # Break shift cipher by chi-square like comparison of distribution with reference
       chi_square_quantile = 52.62
       chi_square_shifts = []
-      for shift in xrange(26):
+      for shift in range(26):
          chi_square = []
-         for k in xrange(26):
+         for k in range(26):
             chi_square.append((freq[(k+shift) % 26] - ref_letter_freq[k])**2 / ref_letter_freq[k])
          chi_square_shifts.append(n*sum(chi_square))
       # Sort the shift guesses by ascending chi square value
@@ -287,7 +287,7 @@ def break_shift(ciphertext, ref_letter_freq, correlation = False):
 
       # Filter out the best few
       shifts_trunc = list(shifts)
-      for k in xrange(len(shifts)-1):
+      for k in range(len(shifts)-1):
          if shifts[k+1][1] < 50:
             continue
          elif shifts[k+1][1] / shifts[k][1] > 1.6:
@@ -296,11 +296,11 @@ def break_shift(ciphertext, ref_letter_freq, correlation = False):
             shifts_trunc = shifts[:k+1]
             break
 
-   return zip(*shifts_trunc)[0]
+   return list(zip(*shifts_trunc))[0]
 
 def count_up(ll_indices, list_of_lists):
    digit = 0
-   for digit in xrange(len(ll_indices)):
+   for digit in range(len(ll_indices)):
       # For every digit: start increasing the left most
       ll_indices[digit] += 1
       if ll_indices[digit] < len(list_of_lists[digit]):
@@ -319,13 +319,13 @@ def break_vigenere(ciphertext, scan_range, num_answers=1, max_best_shifts=2,
                num_key_guesses=100, coefficient_char_deviation=0, coefficient_word_count=1):
 
    # First strip cipher from non-alphabetical characters, convert to upper
-   ciphertext = filter(lambda x: x.isalpha(), ciphertext).upper()
+   ciphertext = [x for x in ciphertext if x.isalpha()].upper()
 
    # This module has had issues dealing with short ciphertexts, and it's
    # statistically super unlikely to solve ciphertexts short enough to cause
    # it issues. Reject any ciphertexts less than 10 characters in length.
    if len(ciphertext) < 10:
-      print '[*] Skipping sample, too short to solve statistically'
+      print('[*] Skipping sample, too short to solve statistically')
       return False
 
    # Determine the key length
@@ -340,7 +340,7 @@ def break_vigenere(ciphertext, scan_range, num_answers=1, max_best_shifts=2,
    for key_length in key_lengths:
       # For every key_length guess in the list:
       # cut list to length which is divisible through the key length
-      sub_blocks = [[ciphertext[i+j*key_length] for j in xrange(0,int(len(ciphertext)/key_length))] for i in xrange(0,key_length)]
+      sub_blocks = [[ciphertext[i+j*key_length] for j in range(0,int(len(ciphertext)/key_length))] for i in range(0,key_length)]
 
       # For every digit in the key (whose length we have now guessed), use an ascii shift cipher breaker
       # against all subblocks consisting of every k-th letter with k = key_length
@@ -355,7 +355,7 @@ def break_vigenere(ciphertext, scan_range, num_answers=1, max_best_shifts=2,
       digit_shift_index = [0]*key_length
       while True:
          # Construct keys from different shift possibilities for each digit
-         current_key =  "".join([digits_shifts[digit][digit_shift_index[digit]] for digit in xrange(len(digits_shifts))])
+         current_key =  "".join([digits_shifts[digit][digit_shift_index[digit]] for digit in range(len(digits_shifts))])
 
          # If more than one key lengths were guessed:
          if len(key_lengths) > 1 and key_length == min(key_lengths):
@@ -369,7 +369,7 @@ def break_vigenere(ciphertext, scan_range, num_answers=1, max_best_shifts=2,
 
          if count_up(digit_shift_index, digits_shifts) == None:
             break
-   keys_sorted_by_single_letter_score = sorted(keys.items(), key=operator.itemgetter(1))
+   keys_sorted_by_single_letter_score = sorted(list(keys.items()), key=operator.itemgetter(1))
 
    # Now do a more advanced analysis on plaintext detection, this time additionally with
    # multigraph frequency analysis and common word count -> this is very slow but more accurate

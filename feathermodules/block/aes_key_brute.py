@@ -41,24 +41,24 @@ def aes_key_brute(samples):
       try:
          keys = open(options['keyfile'],'r').readlines()
       except:
-         print '[*] Key file is not a set of hex encoded 16 byte values. Using default key list.'
+         print('[*] Key file is not a set of hex encoded 16 byte values. Using default key list.')
    else:
       keys = default_keylist
    
    # filter samples into one-block samples and multi-block samples
-   one_block_samples = filter(lambda x: len(x)==16, samples)
-   multi_block_samples = filter(lambda x: len(x) > 16, samples)
+   one_block_samples = [x for x in samples if len(x)==16]
+   multi_block_samples = [x for x in samples if len(x) > 16]
    
    if len(multi_block_samples) == 1:
-      print '[*] One a single multi-block sample exists. This has a 1 in 256 chance of false positives with the CBC test.'
+      print('[*] One a single multi-block sample exists. This has a 1 in 256 chance of false positives with the CBC test.')
    if len(one_block_samples) == 1:
-      print '[*] One a single one-block sample exists. This has a 1 in 256 chance of false positives with the ECB, CBC key-as-IV, and CBC known IV tests.'
+      print('[*] One a single one-block sample exists. This has a 1 in 256 chance of false positives with the ECB, CBC key-as-IV, and CBC known IV tests.')
    
    for key in keys:
       try:
          key = key.decode('hex')
       except:
-         print '[*] Bad key provided, bailing out.'
+         print('[*] Bad key provided, bailing out.')
          return False
 
       # set all bad_decryption flags to False
@@ -115,9 +115,9 @@ def aes_key_brute(samples):
          results.append(key.encode('hex') + ' may be the correct key in CBC mode using the provided IV.')
          
             
-   print 'Potentially correct AES keys:'
-   print '-' * 80
-   print '\n'.join(results)
+   print('Potentially correct AES keys:')
+   print('-' * 80)
+   print('\n'.join(results))
    return results
 
 

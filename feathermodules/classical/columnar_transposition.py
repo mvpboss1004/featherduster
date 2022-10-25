@@ -9,9 +9,9 @@ def break_columnar_transposition(ciphertexts):
       result = [candidate[0] for candidate in result]
       result = 'Ciphertext: ' + ciphertext[:40] + '...\n' + '\n'.join(result)
       results.append(result)
-   print 'Best results of columnar transposition solve(s):'
-   print '-'*80
-   print '\n'.join(results)
+   print('Best results of columnar transposition solve(s):')
+   print('-'*80)
+   print('\n'.join(results))
    return results
 
 

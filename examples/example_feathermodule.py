@@ -21,9 +21,9 @@ def reverse_transposition(samples):
          results.append(sample)
       else:
          results.append(sample[::-1])
-   print 'Decrypted results:'
-   print '-' * 80
-   print '\n'.join(results)
+   print('Decrypted results:')
+   print('-' * 80)
+   print('\n'.join(results))
    return results
 
 

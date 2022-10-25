@@ -8,8 +8,8 @@ FeatherDuster is a tool for brushing away magical crypto fairy dust.
 import sys
 import os
 import readline
-import completer #readline completion
-import advice #advice text
+from . import completer #readline completion
+from . import advice #advice text
 from ishell.console import Console
 from ishell.command import Command
 
@@ -49,14 +49,14 @@ class ImportMultiFileCommand(Command):
       readline.parse_and_bind("tab: complete")
       readline.set_completer(completer.complete)
 
-      sample_file = raw_input('Please enter the filename you want to open: ')
+      sample_file = input('Please enter the filename you want to open: ')
       try:
          sample_fh = open(sample_file,'r')
          feathermodules.samples.extend([sample.strip() for sample in sample_fh.readlines()])
          sample_fh.close()
-         feathermodules.samples = filter(lambda x: x != '' and x != None, feathermodules.samples)
+         feathermodules.samples = [x for x in feathermodules.samples if x != '' and x != None]
       except:
-         print 'Something went wrong. Sorry! Please try again.'
+         print('Something went wrong. Sorry! Please try again.')
       finally:
          readline.set_completer(ishellCompleter)
 
@@ -67,46 +67,46 @@ class ImportSingleFileCommand(Command):
       readline.parse_and_bind("tab: complete")
       readline.set_completer(completer.complete)
 
-      sample_file = raw_input('Please enter the filename you want to open: ')
+      sample_file = input('Please enter the filename you want to open: ')
       try:
          sample_fh = open(sample_file,'r')
          feathermodules.samples.append(sample_fh.read())
          sample_fh.close()
-         feathermodules.samples = filter(lambda x: x != '' and x != None, feathermodules.samples)
+         feathermodules.samples = [x for x in feathermodules.samples if x != '' and x != None]
       except:
-         print 'Something went wrong. Sorry! Please try again.'
+         print('Something went wrong. Sorry! Please try again.')
       finally:
          readline.set_completer(ishellCompleter)
 
 class ImportManualEntryCommand(Command):
    def run(self, line):
-      feathermodules.samples.append(raw_input('Please enter your sample: ').strip())
-      feathermodules.samples = filter(lambda x: x != '' and x != None, feathermodules.samples)
+      feathermodules.samples.append(input('Please enter your sample: ').strip())
+      feathermodules.samples = [x for x in feathermodules.samples if x != '' and x != None]
 
 
 class ImportResultsCommand(Command):
    def run(self, line):
       if not feathermodules.results:
-         print 'Last module failed to produce results.'
+         print('Last module failed to produce results.')
       elif feathermodules.results == True:
-         print 'Last module succeeded, but did not return results.'
+         print('Last module succeeded, but did not return results.')
       else:
-         print 'Last results (long values may be truncated):'
-         print '-'*80
+         print('Last results (long values may be truncated):')
+         print('-'*80)
          for i in range(len(feathermodules.results)):
-            print '{0:d}: {1:60s}'.format(i, repr(feathermodules.results[i]))
+            print('{0:d}: {1:60s}'.format(i, repr(feathermodules.results[i])))
       
-      selection = raw_input('\nPlease enter your selection by number, or \'all\' for all: ')
+      selection = input('\nPlease enter your selection by number, or \'all\' for all: ')
       try:
          if selection == 'all':
             feathermodules.samples.extend(feathermodules.results)
          elif int(selection) < len(feathermodules.results):
             feathermodules.samples.append(feathermodules.results[int(selection)])
          else:
-            print 'Invalid entry, please try again.'
-         feathermodules.samples = filter(lambda x: x != '' and x != None, feathermodules.samples)
+            print('Invalid entry, please try again.')
+         feathermodules.samples = [x for x in feathermodules.samples if x != '' and x != None]
       except ValueError:
-         print 'Invalid entry, please try again.'
+         print('Invalid entry, please try again.')
          
 
 class ImportClearCommand(Command):
@@ -186,13 +186,13 @@ class ExportCommand(Command):
       readline.parse_and_bind("tab: complete")
       readline.set_completer(completer.complete)
 
-      filePath =  raw_input("Please specify a path to the output file: ").strip()
+      filePath =  input("Please specify a path to the output file: ").strip()
 
       readline.set_completer(ishellCompleter)
       if os.path.isfile(filePath):
-         confirm = raw_input("File already exists and will be overwritten, confirm? [y/N] ")
+         confirm = input("File already exists and will be overwritten, confirm? [y/N] ")
          if confirm is "" or confirm[0] not in ("y", "Y"):
-            print "Canceled."
+            print("Canceled.")
             return
 
       with open(filePath, "w+") as handle:
@@ -204,10 +204,10 @@ export = ExportCommand('export', help='Export current results to file', dynamic_
 # use
 class UseCommand(Command):
    def args(self):
-      return feathermodules.module_list.keys()
+      return list(feathermodules.module_list.keys())
    def run(self, line):
-      if line.split()[-1] not in feathermodules.module_list.keys():
-         print 'Invalid module selection. Please try again.'
+      if line.split()[-1] not in list(feathermodules.module_list.keys()):
+         print('Invalid module selection. Please try again.')
       else:
          feathermodules.selected_attack = feathermodules.module_list[ line.split()[-1] ]
          feathermodules.selected_attack_name = line.split()[-1]
@@ -220,19 +220,19 @@ use = UseCommand('use', help='Select the module to use', dynamic_args=True)
 class AnalyzeCommand(Command):
    def run(self, line):
       if len(feathermodules.samples) == 0:
-         print 'No loaded samples. Please use the \'import\' command.'
+         print('No loaded samples. Please use the \'import\' command.')
          return False
-      print '[+] Analyzing samples...'
+      print('[+] Analyzing samples...')
       feathermodules.analysis_results = ca.analyze_ciphertext(feathermodules.samples, verbose=True)
       if feathermodules.analysis_results['decoded_ciphertexts'] != feathermodules.samples:
-         decode = raw_input('[+] Analysis suggests encoded samples. Decode before continuing (Y/n)? ')
+         decode = input('[+] Analysis suggests encoded samples. Decode before continuing (Y/n)? ')
          if decode.lower() not in ('n','no','nope','nah','no thank you'):
             feathermodules.samples = feathermodules.analysis_results['decoded_ciphertexts']
-      print ''
-      print '[+] Suggested modules:'
-      for attack in feathermodules.module_list.keys():
+      print('')
+      print('[+] Suggested modules:')
+      for attack in list(feathermodules.module_list.keys()):
          if len(set(feathermodules.module_list[attack]['keywords']) & set(feathermodules.analysis_results['keywords'])) > 0:
-            print '   {0:<20} - {1:<57}'.format(attack, feathermodules.module_list[attack]['description'])
+            print('   {0:<20} - {1:<57}'.format(attack, feathermodules.module_list[attack]['description']))
    
 analyze = AnalyzeCommand('analyze', help='Analyze/decode samples', dynamic_args=True)
 
@@ -241,23 +241,23 @@ analyze = AnalyzeCommand('analyze', help='Analyze/decode samples', dynamic_args=
 class AutopwnCommand(Command):
    def run(self, line):
       if len(feathermodules.samples) == 0:
-         print 'No loaded samples. Please use the \'import\' command.'
+         print('No loaded samples. Please use the \'import\' command.')
          return False
-      print '[+] Analyzing samples...'
+      print('[+] Analyzing samples...')
       feathermodules.analysis_results = ca.analyze_ciphertext(feathermodules.samples, verbose=True)
       if feathermodules.analysis_results['decoded_ciphertexts'] != feathermodules.samples:
          feathermodules.samples = feathermodules.analysis_results['decoded_ciphertexts']
-      for attack in feathermodules.module_list.keys():
+      for attack in list(feathermodules.module_list.keys()):
          if len(set(feathermodules.module_list[attack]['keywords']) & set(feathermodules.analysis_results['keywords'])) > 0:
-            print 'Running module: %s' % attack
+            print('Running module: %s' % attack)
             feathermodules.current_options = feathermodules.module_list[attack]['options']
             if debug:
-               print feathermodules.module_list[attack]['attack_function'](feathermodules.samples)
+               print(feathermodules.module_list[attack]['attack_function'](feathermodules.samples))
             else:
                try:
-                  print feathermodules.module_list[attack]['attack_function'](feathermodules.samples)
+                  print(feathermodules.module_list[attack]['attack_function'](feathermodules.samples))
                except:
-                  print '[*] Module execution failed, please report this issue at https://github.com/nccgroup/featherduster/issues'
+                  print('[*] Module execution failed, please report this issue at https://github.com/nccgroup/featherduster/issues')
    
 autopwn = AutopwnCommand('autopwn', help='Analyze samples and run all attacks', dynamic_args=True)
 
@@ -267,7 +267,7 @@ class SearchCommand(Command):
    def run(self, line):
       matching_modules = []
       search_param = line.split()[-1].lower()
-      for attack in feathermodules.module_list.keys():
+      for attack in list(feathermodules.module_list.keys()):
          if attack.lower().find(search_param) != -1:
             matching_modules.append(attack)
          elif feathermodules.module_list[attack]['description'].lower().find(search_param) != -1:
@@ -275,7 +275,7 @@ class SearchCommand(Command):
          elif search_param in feathermodules.module_list[attack]['keywords']:
             matching_modules.append(attack)
       for module in matching_modules:
-         print "%s - %s" % (module, feathermodules.module_list[module]['description'])
+         print("%s - %s" % (module, feathermodules.module_list[module]['description']))
       
 search = SearchCommand('search', help='Search module names and descriptions by keyword')
 
@@ -283,10 +283,10 @@ search = SearchCommand('search', help='Search module names and descriptions by k
 # samples
 class SamplesCommand(Command):
    def run(self, line):
-      print '-' * 60
+      print('-' * 60)
       for sample in feathermodules.samples:
-         print repr(sample)
-      print '-' * 60
+         print(repr(sample))
+      print('-' * 60)
 
 samples = SamplesCommand('samples', help='Show samples')
 
@@ -294,8 +294,8 @@ samples = SamplesCommand('samples', help='Show samples')
 # modules
 class ModulesCommand(Command):
    def run(self, line):
-      for attack in feathermodules.module_list.keys():
-         print "%s - %s" % (attack, feathermodules.module_list[attack]['description'])
+      for attack in list(feathermodules.module_list.keys()):
+         print("%s - %s" % (attack, feathermodules.module_list[attack]['description']))
 
 modules = ModulesCommand('modules', help='Show all available modules')
 
@@ -304,10 +304,10 @@ modules = ModulesCommand('modules', help='Show all available modules')
 class RunCommand(Command):
    def run(self, line):
       if len(feathermodules.samples) == 0:
-         print 'No loaded samples. Please use the \'import\' command.'
+         print('No loaded samples. Please use the \'import\' command.')
          return False
-      elif feathermodules.selected_attack_name not in feathermodules.module_list.keys():
-         print 'Invalid module selection. Please use the \'use\' command.'
+      elif feathermodules.selected_attack_name not in list(feathermodules.module_list.keys()):
+         print('Invalid module selection. Please use the \'use\' command.')
          return False
       if debug:
          feathermodules.results = feathermodules.selected_attack['attack_function'](feathermodules.samples)
@@ -315,7 +315,7 @@ class RunCommand(Command):
          try:
             feathermodules.results = feathermodules.selected_attack['attack_function'](feathermodules.samples)
          except:
-            print '[*] Module execution failed, please report this issue at https://github.com/nccgroup/featherduster/issues'
+            print('[*] Module execution failed, please report this issue at https://github.com/nccgroup/featherduster/issues')
          
 
 run = RunCommand('run', help='Run the currently selected module')
@@ -324,21 +324,21 @@ run = RunCommand('run', help='Run the currently selected module')
 # options
 class OptionsCommand(Command):
    def run(self, line):
-      if feathermodules.selected_attack_name not in feathermodules.module_list.keys():
-         print 'Please select a valid module first.'
+      if feathermodules.selected_attack_name not in list(feathermodules.module_list.keys()):
+         print('Please select a valid module first.')
          return False
       else:
-         print ''
-         print '{0:^60}'.format('Currently selected module: ' + feathermodules.selected_attack_name)
-         print '-' * 60
-         if len(feathermodules.selected_attack['options'].items()) == 0:
-            print 'No options to configure.'
+         print('')
+         print('{0:^60}'.format('Currently selected module: ' + feathermodules.selected_attack_name))
+         print('-' * 60)
+         if len(list(feathermodules.selected_attack['options'].items())) == 0:
+            print('No options to configure.')
          else:
-            for option, default in feathermodules.selected_attack['options'].items():
+            for option, default in list(feathermodules.selected_attack['options'].items()):
                try:
-                  print '{0:<20}{1:>40}'.format(option, feathermodules.current_options[option])
+                  print('{0:<20}{1:>40}'.format(option, feathermodules.current_options[option]))
                except:
-                  print '{0:<20}{1:>40}'.format(option, default)
+                  print('{0:<20}{1:>40}'.format(option, default))
 
 
 # set
@@ -347,14 +347,14 @@ class SetCommand(Command):
       line_split = line.split()
       # set option_name value
       if not (len(line_split) == 2 and '=' in line_split[1]):
-         print 'Usage: set <option>=<value>'
+         print('Usage: set <option>=<value>')
          return False
       option = line_split[1].split('=')[0]
       first_eq = line_split[1].find('=') 
       value = line_split[1][first_eq+1:]
       feathermodules.current_options[option] = value
    def args(self):
-      return feathermodules.selected_attack['options'].keys()
+      return list(feathermodules.selected_attack['options'].keys())
 
 
 # unset
@@ -363,30 +363,30 @@ class UnsetCommand(Command):
       line_split = line.split()
       # unset option_name
       if len(line_split) != 2:
-         print 'Usage: unset <option>'
+         print('Usage: unset <option>')
          return False
       option = line_split[1]
       try:
          feathermodules.current_options[option] = feathermodules.selected_attack['options'][option]
       except KeyError:
-         print '[*] That option doesn\'t exist, sorry!'
+         print('[*] That option doesn\'t exist, sorry!')
       except AttributeError:
-         print '[*] Please select an attack first!'
+         print('[*] Please select an attack first!')
    def args(self):
-      return feathermodules.selected_attack['options'].keys()
+      return list(feathermodules.selected_attack['options'].keys())
 
 # results
 class ResultsCommand(Command):
    def run(self, line):
       if not feathermodules.results:
-         print 'Last module failed to produce results.'
+         print('Last module failed to produce results.')
       elif feathermodules.results == True:
-         print 'Last module succeeded, but did not return results.'
+         print('Last module succeeded, but did not return results.')
       else:
-         print 'Last results (long values may be truncated):'
-         print '-'*80
+         print('Last results (long values may be truncated):')
+         print('-'*80)
          for i in range(len(feathermodules.results)):
-            print '{0:d}: {1:60s}'.format(i, repr(feathermodules.results[i]))
+            print('{0:d}: {1:60s}'.format(i, repr(feathermodules.results[i])))
       
 
 set_command = SetCommand('set', help='Set an option (i.e., "set num_answers=3"', dynamic_args=True)
@@ -423,11 +423,11 @@ debug = False
 
 for filename in sys.argv[1:]:
    if filename in ['-h', '--help']:
-      print 'Usage: python featherduster.py [ciphertext file 1] ... [ciphertext file n]'
+      print('Usage: python3 featherduster.py [ciphertext file 1] ... [ciphertext file n]')
       exit()
    if filename in ['-d', '--debug']:
       debug = True
-      print 'Debug mode enabled.'
+      print('Debug mode enabled.')
    try:
       sample_fh = open(filename,'r')
       feathermodules.samples.append(sample_fh.read())
@@ -435,7 +435,7 @@ for filename in sys.argv[1:]:
    except:
       continue
 
-print """Welcome to FeatherDuster!
+print("""Welcome to FeatherDuster!
 
 To get started, use 'import' to load samples.
 Then, use 'analyze' to analyze/decode samples and get attack recommendations.
@@ -443,11 +443,11 @@ Next, run the 'use' command to select an attack module.
 Finally, use 'run' to run the attack and see its output.
 
 For a command reference, press Enter on a blank line.
-"""
+""")
 
 fd_console.loop()
 
-print '\nThank you for using FeatherDuster!'
+print('\nThank you for using FeatherDuster!')
 
 def main():
    # blank function so I don't have to restructure this whole file to address an annoying error 

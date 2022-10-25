@@ -187,7 +187,7 @@ def give_advice():
    if feathermodules.samples == []:
       advice += advice_text['no_samples']
       advice += advice_text['gathering_samples']
-      print advice
+      print(advice)
       return
 
    give_sample_advice = False
@@ -202,7 +202,7 @@ def give_advice():
 
    if feathermodules.analysis_results == False:
       advice += advice_text['analysis_guide']
-      print advice
+      print(advice)
       return
    
    if feathermodules.analysis_results['decoded_ciphertexts']:
