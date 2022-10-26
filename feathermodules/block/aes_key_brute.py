@@ -56,7 +56,7 @@ def aes_key_brute(samples):
    
    for key in keys:
       try:
-         key = key.decode('hex')
+         key = bytes.fromhex(key)
       except:
          print('[*] Bad key provided, bailing out.')
          return False
@@ -88,7 +88,7 @@ def aes_key_brute(samples):
             cbc_key_as_iv_bad_decrypt = True
             # CBC with entered IV
             for sample in one_block_samples:
-               cipher = AES.new(key, AES.MODE_CBC, options['known_iv'].decode('hex'))
+               cipher = AES.new(key, AES.MODE_CBC, bytes.fromhex(options['known_iv']))
                # If any decryption fails to produce valid padding, flag bad CBC decryption and break
                if decrypt_and_check(cipher, sample) == False:
                   cbc_known_iv_bad_decrypt = True

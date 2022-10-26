@@ -642,7 +642,7 @@ def analyze_ciphertext(data, verbose=False):
    data - A list of samples to analyze
    verbose - (bool) Display messages regarding analysis results
    '''
-   data = [x for x in data if x is not None and x is not '']
+   data = [x for x in data if x not in (None,'')]
    results = {}
    result_properties = ['ecb', 'cbc_fixed_iv', 'blocksize', 'md_hashes',
    'sha1_hashes', 'sha2_hashes', 'individually_random', 'collectively_random', 'is_openssl_formatted', 'decoded_ciphertexts', 'key_reuse', 'rsa_key', 'rsa_private_key', 'rsa_small_n']
@@ -671,7 +671,7 @@ def analyze_ciphertext(data, verbose=False):
       # check for silly/classical crypto here
       data_properties[index]['is_transposition_only'] = (detect_plaintext(datum.lower(),frequency.frequency_tables['single_english_icase_letters']) < 1)
       data_properties[index]['is_polybius'] = detect_polybius(datum)
-      data_properties[index]['is_all_alpha'] = all([char in ' '+string.lowercase for char in datum.lower()])
+      data_properties[index]['is_all_alpha'] = all([char in ' '+string.ascii_lowercase for char in datum.lower()])
    if all([data_properties[datum]['is_openssl_formatted'] for datum in data_properties]):
       if verbose:
          print('[+] Messages appear to be in OpenSSL format. Stripping OpenSSL header and analyzing again.')
@@ -679,7 +679,7 @@ def analyze_ciphertext(data, verbose=False):
    if all([data_properties[datum]['hex_encoded'] for datum in data_properties]):
       if verbose:
          print('[+] Messages appear to be ASCII hex encoded, hex decoding and analyzing again.')
-      return analyze_ciphertext([x.decode('hex') for x in data], verbose=verbose)
+      return analyze_ciphertext([bytes.fromhex(x) for x in data], verbose=verbose)
    if all([data_properties[datum]['zlib_compressed'] for datum in data_properties]):
       if verbose:
          print('[+] Messages appear to be zlib compressed, decompressing and analyzing again.')

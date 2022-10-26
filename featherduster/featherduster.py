@@ -191,7 +191,7 @@ class ExportCommand(Command):
       readline.set_completer(ishellCompleter)
       if os.path.isfile(filePath):
          confirm = input("File already exists and will be overwritten, confirm? [y/N] ")
-         if confirm is "" or confirm[0] not in ("y", "Y"):
+         if confirm=="" or confirm[0] not in ("y", "Y"):
             print("Canceled.")
             return
 

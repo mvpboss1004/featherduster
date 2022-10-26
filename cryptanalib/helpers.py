@@ -152,7 +152,7 @@ def is_hex_encoded(sample):
    sample - (string) The sample to evaluate
    '''
    try:
-      sample.decode('hex')
+      bytes.fromhex(sample)
       return True
    except:
       return False
@@ -240,7 +240,7 @@ def check_key_reuse(samples):
    
    samples - (list) Two or more samples for evaluation
    '''
-   samples = [x for x in samples if len(x) is not 0]
+   samples = [x for x in samples if len(x)!=0]
    if len(samples) == 1:
       print('Need more than one non-null sample')
       return None
@@ -524,7 +524,7 @@ def generate_frequency_table(text,charset):
          freq_table[char] += 1
          text_len += 1
    for multigraph in [x for x in charset if len(x)>1]:
-      freq_table[multigraph] = string.count(text, multigraph)
+      freq_table[multigraph] = text.count(multigraph)
    # Normalize frequencies with length of text
    for key in list(freq_table.keys()):
       if text_len != 0:
@@ -595,9 +595,9 @@ def long_to_string(inlong):
    '''
    hex_encoded = hex(inlong)[2:-1]
    if len(hex_encoded) % 2 == 1:
-      return ('0'+hex_encoded).decode('hex')
+      return bytes.fromhex('0'+hex_encoded)
    else:
-      return hex_encoded.decode('hex')
+      return bytes.fromhex(hex_encoded)
 
 
 def split_into_blocks(ciphertext,blocksize):
@@ -652,11 +652,11 @@ def make_polybius_square(password,extended=False):
    password - (string) The password to use when generating the polybius square
    extended - (bool) Set to True to use a 6x6 square instead of a 5x5
    '''
-   alphabet = string.lowercase
+   alphabet = string.ascii_lowercase
    if extended == True:
       alphabet += string.digits
    else:
-      alphabet = string.replace(string.lowercase, 'j', '')
+      alphabet = string.replace(string.ascii_lowercase, 'j', '')
       password = string.replace(password, 'j', 'i')
    if any([x not in alphabet for x in set(password)]):
       return False

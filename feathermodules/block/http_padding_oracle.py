@@ -25,10 +25,10 @@ def padding_oracle(ciphertext):
       return True
 
 # To decrypt the first command line argument:
-print "The decrypted version of your input is: " + ca.padding_oracle_decrypt(padding_oracle=padding_oracle, ciphertext=sys.argv[1].decode('hex'), block_size=%r, padding_type=%r, iv=%r.decode('hex'), verbose=True, hollywood=%r)
+print "The decrypted version of your input is: " + ca.padding_oracle_decrypt(padding_oracle=padding_oracle, ciphertext=bytes.fromhex(sys.argv[1]), block_size=%r, padding_type=%r, iv=bytes.fromhex(%r), verbose=True, hollywood=%r)
 
 # To encrypt the first command line argument:
-# print "Your new ciphertext is: " + ca.cbcr(sys.argv[1].decode('hex'), oracle=padding_oracle, is_padding_oracle=True, block_size=%r, verbose=True)
+# print "Your new ciphertext is: " + ca.cbcr(bytes.fromhex(sys.argv[1]), oracle=padding_oracle, is_padding_oracle=True, block_size=%r, verbose=True)
 """
 
 def generate_http_padding_oracle_attack_script(ciphertexts):
@@ -90,7 +90,7 @@ def prepare_options(options, ciphertexts):
       options['iv'] = '00'*options['blocksize']
    else:
       try:
-         options['iv'].decode('hex')
+         bytes.fromhex(options['iv'])
       except:
          print('[*] IV was not in the correct format. Please provide a hex-encoded IV with length matching the blocksize.')
          return False

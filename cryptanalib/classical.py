@@ -86,7 +86,7 @@ def morse_encode(text, dot='.', dash='-', space=' '):
    translated_morse_table = dict(translated_morse_table)
    output = []
    for char in text.lower():
-      if char in string.lowercase + string.digits:
+      if char in string.ascii_lowercase + string.digits:
          output.append(translated_morse_table[char])
    return space.join(output)
    
@@ -143,7 +143,7 @@ def break_generic_shift(ciphertext, charset, num_answers=1):
 
 def break_alpha_shift(ciphertext, num_answers=1):
    '''Call generic shift cipher breaker with lowercase letters'''
-   return break_generic_shift(ciphertext.lower(), string.lowercase, num_answers=num_answers)
+   return break_generic_shift(ciphertext.lower(), string.ascii_lowercase, num_answers=num_answers)
 
 def break_ascii_shift(ciphertext):
    '''Call generic shift cipher breaker with full ASCII range'''
@@ -157,7 +157,7 @@ def break_columnar_transposition(ciphertext, pt_freq_table=frequency.frequency_t
    '''Uses brute force and plaintext detection to break columnar transposition'''
    results = {}
    ciphertext_len = len(ciphertext)
-   for num_cols in range(2,ciphertext_len/2):
+   for num_cols in range(2, int(ciphertext_len/2)):
       result = ''.join([ciphertext[num::num_cols] for num in range(num_cols)])
       results[result] = detect_plaintext(result, pt_freq_table=pt_freq_table, detect_words=True)
    return sorted(list(results.items()),key=operator.itemgetter(1))[:num_answers]
@@ -319,7 +319,7 @@ def break_vigenere(ciphertext, scan_range, num_answers=1, max_best_shifts=2,
                num_key_guesses=100, coefficient_char_deviation=0, coefficient_word_count=1):
 
    # First strip cipher from non-alphabetical characters, convert to upper
-   ciphertext = [x for x in ciphertext if x.isalpha()].upper()
+   ciphertext = ''.join([x.upper() for x in ciphertext if x.isalpha()])
 
    # This module has had issues dealing with short ciphertexts, and it's
    # statistically super unlikely to solve ciphertexts short enough to cause

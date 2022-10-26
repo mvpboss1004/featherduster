@@ -7,11 +7,11 @@ iv = Random.new().read(AES.block_size)
 cipher = AES.new(key, AES.MODE_CBC, iv)
 
 def my_decryption_oracle(ciphertext):
-   plaintext = cipher.decrypt(ciphertext)
+   plaintext = cipher.decrypt(ciphertext.encode())
    return ca.pkcs7_padding_remove(plaintext,AES.block_size)
 
 def my_padding_oracle(ciphertext):
-   plaintext = cipher.decrypt(ciphertext)
+   plaintext = cipher.decrypt(ciphertext.encode())
    return ca.pkcs7_padding_remove(plaintext,AES.block_size) != False
 
 new_plaintext = 'I am the very model of a modern major-general.'

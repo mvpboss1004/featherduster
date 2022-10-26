@@ -7,6 +7,6 @@ dependencies - PyCrypto, GMPy
 
 __all__ = ['helpers', 'modern', 'classical']
 
-from helpers import *
-from modern import *
-from classical import *
+from .helpers import *
+from .modern import *
+from .classical import *
